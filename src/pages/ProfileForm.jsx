@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Formik, Field, Form } from 'formik';
 import Header from '../Components/Header';
-import { useCallbackPrompt } from '../usePrompt';
+import { useCallbackPrompt } from '../hooks/usePrompt';
 
 const ProfileForm = () => {
   const [isDirty, setIsDirty] = useState(false);
 
-  const [showPrompt, confirmNavigation] = useCallbackPrompt(isDirty);
-  console.log(confirmNavigation);
+  const [
+    showPrompt,
+    // confirmNavigation,
+    // cancelNavigation
+  ] = useCallbackPrompt(isDirty);
 
   const values = {
     fullName: '',
     email: '',
-
     phone: '',
-
     address: '',
     zipcode: '',
     city: '',
@@ -22,8 +23,12 @@ const ProfileForm = () => {
   };
 
   const onSubmit = (values, actions) => {
+    // RECOMMENDATION: Make use of yup library to validate the form on Submit.
+    // Write your logic of form after the submission.
     console.log(values);
-    actions.isSubmitting(false);
+
+    actions.setSubmitting(false);
+    actions.resetForm(values);
   };
 
   return (
@@ -33,7 +38,7 @@ const ProfileForm = () => {
       <h3>Profile Information</h3>
 
       <Formik initialValues={values} onSubmit={onSubmit}>
-        {({ dirty }) => {
+        {({ dirty, isSubmitting }) => {
           return (
             <Form>
               <Field
@@ -85,11 +90,24 @@ const ProfileForm = () => {
                 placeholder='Country'
               />
               <br />
-              <button type='submit'>Submit</button>
+              <button disabled={isSubmitting} type='submit'>
+                Submit
+              </button>
             </Form>
           );
         }}
       </Formik>
+
+      {/* 
+            PROBLEM:
+            You shouldn't use alert here as there is no way 
+            to set the 'setIsDirty' state to `false. & Using alert here 
+            will mount this component continuously hence maybe results 
+            in crashing the web app.
+
+            SOLUTION:
+            Make a custom Modal and handle all the condition there.
+      */}
 
       {showPrompt && alert('Are you sure you want to leave the page?')}
     </div>
